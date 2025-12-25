@@ -1,85 +1,77 @@
 import streamlit as st
+import numpy as np
+import pickle
 
-# ---------------- PAGE CONFIG ----------------
-st.set_page_config(
-    page_title="Multi-Disease Diagnostic App",
-    page_icon="🩺",
-    layout="wide"
-)
+# ================== SESSION STATE INIT ==================
+if 'page' not in st.session_state:
+    st.session_state['page'] = 'Home'
 
-# ---------------- SIDEBAR ----------------
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to:", ["Home", "Heart", "Kidney", "Liver", "Diabetes", "Brain Tumor"])
+# ================== MODEL LOADER ==================
+@st.cache_resource
+def load_model(path, default_features=[]):
+    with open(path, "rb") as f:
+        data = pickle.load(f)
+    if isinstance(data, tuple):
+        model, scaler = data
+        features = default_features
+    else:
+        model = data['model']
+        scaler = data['scaler']
+        features = data['features']
+    return model, scaler, features
 
-# ---------------- HOME PAGE ----------------
-if page == "Home":
+# ================== DASHBOARD ==================
+if st.session_state['page'] == 'Home':
     st.title("🩺 Multi-Disease Diagnostic Portal")
-    st.markdown("""
-    Welcome! This portal helps you **predict multiple diseases** using AI.
-    Select a disease from the sidebar to start.
-    """)
-    
-    # Display boxes for each disease
+    st.write("Welcome! Click a disease below to start prediction:")
+
     col1, col2, col3 = st.columns(3)
-    
     with col1:
-        st.markdown(
-            '<div style="background-color:#FFC0CB; border-radius:10px; padding:20px; text-align:center;">'
-            '<h3>❤️ Heart</h3>'
-            '<p>Check your heart health</p>'
-            '</div>', unsafe_allow_html=True)
-    
+        if st.button("❤️ Heart"):
+            st.session_state['page'] = 'Heart'
     with col2:
-        st.markdown(
-            '<div style="background-color:#ADD8E6; border-radius:10px; padding:20px; text-align:center;">'
-            '<h3>🩸 Diabetes</h3>'
-            '<p>Monitor glucose & risk</p>'
-            '</div>', unsafe_allow_html=True)
-    
+        if st.button("🩸 Diabetes"):
+            st.session_state['page'] = 'Diabetes'
     with col3:
-        st.markdown(
-            '<div style="background-color:#90EE90; border-radius:10px; padding:20px; text-align:center;">'
-            '<h3>🧠 Brain</h3>'
-            '<p>Detect brain tumor</p>'
-            '</div>', unsafe_allow_html=True)
-    
+        if st.button("🧠 Brain"):
+            st.session_state['page'] = 'Brain'
+
     col4, col5 = st.columns(2)
-    
     with col4:
-        st.markdown(
-            '<div style="background-color:#FFD580; border-radius:10px; padding:20px; text-align:center;">'
-            '<h3>🟣 Kidney</h3>'
-            '<p>Check kidney function</p>'
-            '</div>', unsafe_allow_html=True)
-    
+        if st.button("🟣 Kidney"):
+            st.session_state['page'] = 'Kidney'
     with col5:
-        st.markdown(
-            '<div style="background-color:#FFA07A; border-radius:10px; padding:20px; text-align:center;">'
-            '<h3>🟠 Liver</h3>'
-            '<p>Check liver health</p>'
-            '</div>', unsafe_allow_html=True)
+        if st.button("🟠 Liver"):
+            st.session_state['page'] = 'Liver'
 
-# ---------------- HEART PAGE ----------------
-elif page == "Heart":
-    # Import Heart page code here
-    import pages.Heart
+# ================== HEART PREDICTION ==================
+elif st.session_state['page'] == 'Heart':
+    st.header("❤️ Heart Disease Prediction")
+    # Paste your heart ML form & prediction code here
+    # Example:
+    age = st.number_input("Age", 0, 120, 52)
+    st.button("Back to Home", on_click=lambda: st.session_state.update({'page': 'Home'}))
 
-# ---------------- KIDNEY PAGE ----------------
-elif page == "Kidney":
-    import pages.Kidney
+# ================== DIABETES PREDICTION ==================
+elif st.session_state['page'] == 'Diabetes':
+    st.header("🩸 Diabetes Prediction")
+    # Paste your diabetes ML code here
+    st.button("Back to Home", on_click=lambda: st.session_state.update({'page': 'Home'}))
 
-# ---------------- LIVER PAGE ----------------
-elif page == "Liver":
-    import pages.Liver
+# ================== BRAIN PREDICTION ==================
+elif st.session_state['page'] == 'Brain':
+    st.header("🧠 Brain Tumor Prediction")
+    # Paste your brain tumor ML code here
+    st.button("Back to Home", on_click=lambda: st.session_state.update({'page': 'Home'}))
 
-# ---------------- DIABETES PAGE ----------------
-elif page == "Diabetes":
-    import pages.Diabetes
+# ================== KIDNEY PREDICTION ==================
+elif st.session_state['page'] == 'Kidney':
+    st.header("🟣 Kidney Disease Prediction")
+    # Paste your kidney ML code here
+    st.button("Back to Home", on_click=lambda: st.session_state.update({'page': 'Home'}))
 
-# ---------------- BRAIN TUMOR PAGE ----------------
-elif page == "Brain Tumor":
-    import pages.Brain_Tumor
-
-# ---------------- FOOTER ----------------
-st.markdown("---")
-st.caption("Made with ❤️ by your ML buddy")
+# ================== LIVER PREDICTION ==================
+elif st.session_state['page'] == 'Liver':
+    st.header("🟠 Liver Disease Prediction")
+    # Paste your liver ML code here
+    st.button("Back to Home", on_click=lambda: st.session_state.update({'page': 'Home'}))
