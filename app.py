@@ -48,6 +48,7 @@ def load_brain_model():
     model = load_model(model_path)
     return model
 
+
 # ================= DISEASE SELECTION =================
 disease = st.selectbox(
     "Choose a disease to predict:",
@@ -154,21 +155,57 @@ elif disease == "Diabetes":
 # ================= BRAIN TUMOR =================
 elif disease == "Brain Tumor":
     st.subheader("🧠 Brain Tumor Prediction (MRI Image)")
+
     model = load_brain_model()
 
-    file = st.file_uploader("Upload MRI Image", type=["jpg","jpeg","png"])
+    # Show expected input (for debug – remove later)
+    st.write("Model input shape:", model.input_shape)
 
-    if file:
-        image = Image.open(file).convert("RGB")
-        st.image(image, use_column_width=True)
+    uploaded_file = st.file_uploader(
+        "Upload MRI Image",
+        type=["jpg", "jpeg", "png"]
+    )
 
-        img = image.resize((128,128))
-        img = np.array(img)/255.0
-        img = np.expand_dims(img, axis=0)
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+
+        # ===== Convert based on model channels =====
+        if model.input_shape[-1] == 1:
+            image = image.convert("L")
+        else:
+            image = image.convert("RGB")
+
+        st.image(image, caption="Uploaded MRI", use_column_width=True)
+
+        # ===== Resize exactly as model expects =====
+        img_height = model.input_shape[1]
+        img_width = model.input_shape[2]
+
+        image = image.resize((img_width, img_height))
+        img_array = np.array(image) / 255.0
+
+        # Add channel dimension if grayscale
+        if model.input_shape[-1] == 1:
+            img_array = np.expand_dims(img_array, axis=-1)
+
+        # Add batch dimension
+        img_array = np.expand_dims(img_array, axis=0)
 
         if st.button("🔍 Predict Brain Tumor"):
-            pred = model.predict(img)[0][0]
-            st.error("⚠️ Brain Tumor Detected" if pred > 0.5 else "✅ No Brain Tumor")
+            try:
+                prediction = model.predict(img_array)
 
-st.markdown("---")
-st.markdown("Made with ❤️ for ML Deployment")
+                # Sigmoid OR Softmax safe handling
+                if prediction.shape[-1] == 1:
+                    prob = prediction[0][0]
+                    st.error("⚠️ Brain Tumor Detected" if prob > 0.5 else "✅ No Brain Tumor")
+                    st.write(f"Confidence: {prob*100:.2f}%")
+                else:
+                    class_id = np.argmax(prediction)
+                    confidence = np.max(prediction)
+                    st.error("⚠️ Brain Tumor Detected" if class_id == 1 else "✅ No Brain Tumor")
+                    st.write(f"Confidence: {confidence*100:.2f}%")
+
+            except Exception as e:
+                st.error("Prediction failed")
+                st.code(str(e))
