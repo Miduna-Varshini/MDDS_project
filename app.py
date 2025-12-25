@@ -2,21 +2,20 @@ import streamlit as st
 import numpy as np
 import pickle
 
-st.set_page_config(page_title="Heart Disease Prediction", layout="centered")
-st.title("❤️ Heart Disease Prediction (13 Features)")
+st.set_page_config(page_title="Diabetes Prediction", layout="centered")
+st.title("🩸 Diabetes Prediction (8 Features)")
 
 # ================= SAFE MODEL LOADER =================
 @st.cache_resource
 def load_model():
-    with open("models/heart_model.pkl", "rb") as f:
+    with open("models/diabetes_model.pkl", "rb") as f:
         data = pickle.load(f)
     # Handle both tuple and dict formats
     if isinstance(data, tuple):
         model, scaler = data
         features = [
-            "Age", "Sex", "Chest pain type", "BP", "Cholesterol",
-            "FBS over 120", "EKG results", "Max HR", "Exercise angina",
-            "ST depression", "Slope of ST", "Number of vessels fluro", "Thallium"
+            "Pregnancies", "Glucose", "BloodPressure", "SkinThickness",
+            "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"
         ]
     else:
         model = data["model"]
@@ -29,37 +28,31 @@ model, scaler, FEATURES = load_model()
 # ================= INPUTS =================
 st.subheader("Enter Patient Details")
 
-age = st.number_input("Age", 0, 120, value=52)
-sex = st.selectbox("Sex (0 = Female, 1 = Male)", [0, 1])
-cp = st.number_input("Chest Pain Type (0–3)", 0, 3, value=0)
-trestbps = st.number_input("Resting Blood Pressure (BP)", 80, 200, value=120)
-chol = st.number_input("Cholesterol", 100, 600, value=240)
-fbs = st.selectbox("Fasting Blood Sugar > 120 mg/dl", [0, 1])
-restecg = st.number_input("Resting ECG Results (0–2)", 0, 2, value=1)
-thalach = st.number_input("Maximum Heart Rate Achieved", 60, 250, value=150)
-exang = st.selectbox("Exercise Induced Angina", [0, 1])
-oldpeak = st.number_input("ST Depression (Oldpeak)", 0.0, 10.0, value=1.2)
-slope = st.number_input("Slope of ST Segment (0–2)", 0, 2, value=1)
-ca = st.number_input("Number of Major Vessels (0–3)", 0, 3, value=0)
-thal = st.number_input("Thalassemia (1 = normal, 2 = fixed defect, 3 = reversible defect)", 1, 3, value=2)
+preg = st.number_input("Pregnancies", 0, 20, value=2)
+glucose = st.number_input("Glucose", 0, 300, value=120)
+bp = st.number_input("Blood Pressure", 0, 200, value=70)
+skin = st.number_input("Skin Thickness", 0, 100, value=20)
+insulin = st.number_input("Insulin", 0, 900, value=85)
+bmi = st.number_input("BMI", 0.0, 70.0, value=28.5)
+dpf = st.number_input("Diabetes Pedigree Function", 0.0, 3.0, value=0.5)
+age = st.number_input("Age", 1, 120, value=32)
 
 # ================= PREDICTION =================
-if st.button("🔍 Predict Heart Disease"):
+if st.button("🔍 Predict Diabetes"):
     try:
-        # Quick rule-based alert for obvious risk
-        if chol > 300 or trestbps > 160 or thalach < 100:
-            st.error("⚠️ Possible Heart Disease Detected (Rule-Based Alert)")
+        # Rule-based alert for obvious risk
+        if glucose > 180 or bmi > 40 or insulin > 300:
+            st.error("⚠️ Possible Diabetes Detected (Rule-Based Alert)")
         else:
             # Prepare input for model
-            X_input = np.array([[age, sex, cp, trestbps, chol, fbs, restecg,
-                                 thalach, exang, oldpeak, slope, ca, thal]])
+            X_input = np.array([[preg, glucose, bp, skin, insulin, bmi, dpf, age]])
             X_scaled = scaler.transform(X_input)
             prediction = model.predict(X_scaled)[0]
 
             if prediction == 1:
-                st.error("⚠️ Heart Disease Detected")
+                st.error("⚠️ Diabetes Detected")
             else:
-                st.success("✅ No Heart Disease Detected")
+                st.success("✅ No Diabetes Detected")
 
     except Exception as e:
         st.error("Prediction failed")
