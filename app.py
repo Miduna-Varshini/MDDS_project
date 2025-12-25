@@ -3,78 +3,48 @@ import numpy as np
 import pickle
 
 st.set_page_config(page_title="Kidney Disease Prediction", layout="centered")
-st.title("🩺 Kidney Disease Prediction")
+st.title("🩺 Kidney Disease Prediction (10 Features)")
 
 # ================= SAFE MODEL LOADER =================
 @st.cache_resource
 def load_model():
-    with open("models/kidney_model.pkl", "rb") as f:
+    with open("models/kidney_10f_model.pkl", "rb") as f:
         data = pickle.load(f)
+    model = data["model"]
+    scaler = data["scaler"]
+    features = data["features"]
+    return model, scaler, features
 
-    # CASE 1: dictionary
-    if isinstance(data, dict):
-        model = data.get("model")
-        scaler = data.get("scaler")
-
-    # CASE 2: tuple (model, scaler)
-    elif isinstance(data, tuple):
-        model = data[0]
-        scaler = data[1]
-
-    else:
-        raise ValueError("Unsupported model file format")
-
-    return model, scaler
-
-
-model, scaler = load_model()
+model, scaler, FEATURES = load_model()
 
 # ================= INPUTS =================
 st.subheader("Enter Patient Details")
 
-age = st.number_input("Age", 0, 100)
-bp = st.number_input("Blood Pressure", 0, 200)
-sg = st.number_input("Specific Gravity", 1.0, 1.05)
-al = st.number_input("Albumin", 0, 5)
-su = st.number_input("Sugar", 0, 5)
-bgr = st.number_input("Blood Glucose Random", 0)
-bu = st.number_input("Blood Urea", 0)
-sc = st.number_input("Serum Creatinine", 0.0)
-sod = st.number_input("Sodium", 0)
-pot = st.number_input("Potassium", 0.0)
-hemo = st.number_input("Hemoglobin", 0.0)
-pcv = st.number_input("Packed Cell Volume", 0)
-wc = st.number_input("White Blood Cell Count", 0)
-rc = st.number_input("Red Blood Cell Count", 0.0)
-
-htn = st.selectbox("Hypertension", ["No", "Yes"])
-dm = st.selectbox("Diabetes Mellitus", ["No", "Yes"])
-cad = st.selectbox("Coronary Artery Disease", ["No", "Yes"])
-appet = st.selectbox("Appetite", ["Poor", "Good"])
-pe = st.selectbox("Pedal Edema", ["No", "Yes"])
-ane = st.selectbox("Anemia", ["No", "Yes"])
-
-# Manual encoding (same as your training style)
-htn = 1 if htn == "Yes" else 0
-dm = 1 if dm == "Yes" else 0
-cad = 1 if cad == "Yes" else 0
-appet = 1 if appet == "Good" else 0
-pe = 1 if pe == "Yes" else 0
-ane = 1 if ane == "Yes" else 0
+# Create input fields for 10 features
+age = st.number_input("Age", 0, 120, value=45)
+bp = st.number_input("Blood Pressure (BP)", 0, 200, value=80)
+sg = st.number_input("Specific Gravity (SG)", 1.0, 1.05, value=1.020)
+al = st.number_input("Albumin (AL)", 0, 5, value=0)
+su = st.number_input("Sugar (SU)", 0, 5, value=0)
+bgr = st.number_input("Blood Glucose Random (BGR)", 0, 500, value=110)
+bu = st.number_input("Blood Urea (BU)", 0, 200, value=25)
+sc = st.number_input("Serum Creatinine (SC)", 0.0, 20.0, value=1.0)
+hemo = st.number_input("Hemoglobin (HEMO)", 0.0, 20.0, value=15.2)
+pcv = st.number_input("Packed Cell Volume (PCV)", 0, 60, value=44)
 
 # ================= PREDICTION =================
 if st.button("🔍 Predict Kidney Disease"):
     try:
-        X = np.array([[  
-            age, bp, sg, al, su,
-            bgr, bu, sc, sod, pot,
-            hemo, pcv, wc, rc,
-            htn, dm, cad, appet, pe, ane
-        ]])
+        # Create input array
+        X_input = np.array([[age, bp, sg, al, su, bgr, bu, sc, hemo, pcv]])
 
-        X_scaled = scaler.transform(X)
+        # Scale features
+        X_scaled = scaler.transform(X_input)
+
+        # Predict
         prediction = model.predict(X_scaled)[0]
 
+        # Show result
         if prediction == 1:
             st.error("⚠️ Chronic Kidney Disease Detected")
         else:
@@ -83,3 +53,6 @@ if st.button("🔍 Predict Kidney Disease"):
     except Exception as e:
         st.error("Prediction failed")
         st.code(str(e))
+
+st.markdown("---")
+st.markdown("Made with ❤️ by your ML buddy")
