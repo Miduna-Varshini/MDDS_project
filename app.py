@@ -81,76 +81,142 @@ def login():
 
 # ===================== HOME DASHBOARD =====================
 # ===================== IMPROVED HOME DASHBOARD =====================
+# ===================== DASHBOARD-STYLE HOME PAGE =====================
 def home_dashboard():
     st.markdown(
         """
         <style>
-        .main-header {
-            font-size: 36px;
-            font-weight: bold;
-            text-align: center;
-            color: #ffffff;
+        /* Main container */
+        .dashboard-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
         }
-        .sub-header {
-            font-size: 20px;
-            text-align: center;
-            margin-bottom: 40px;
-            color: #d1d5db;
-        }
-        .button-style {
-            padding: 20px 25px;
-            font-size: 18px;
-            margin: 10px;
-            border-radius: 12px;
-            background-color: #1f2937;
+        /* Card style */
+        .card {
+            width: 260px;
+            height: 100px;
+            border-radius: 15px;
             color: white;
-            border: 2px solid #4f46e5;
-            transition: all 0.2s ease;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-align: left;
         }
-        .button-style:hover {
-            background-color: #4f46e5;
-            color: #fff;
+        .card:hover {
             transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-        .logout-style {
-            margin-top: 30px;
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .card-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .card-heart { background: linear-gradient(135deg, #f87171, #ef4444); }
+        .card-diabetes { background: linear-gradient(135deg, #f472b6, #ec4899); }
+        .card-brain { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
+        .card-kidney { background: linear-gradient(135deg, #c4b5fd, #7c3aed); }
+        .card-liver { background: linear-gradient(135deg, #fb923c, #f97316); }
+        .logout-btn {
             background-color: #ef4444;
-            border: 2px solid #b91c1c;
+            color: white;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            border: none;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #b91c1c;
         }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    st.markdown('<div class="main-header">🩺 Multi-Disease Diagnostic Portal</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="sub-header">Welcome **{st.session_state["current_user"]}**! Select a disease below:</div>', unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align:center; color:#1f2937'>🩺 Multi-Disease Diagnostic Portal</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align:center; color:#4b5563; margin-bottom:30px;'>Welcome <b>{st.session_state['current_user']}</b>! Select a disease:</h3>", unsafe_allow_html=True)
 
-    # Using columns for responsive layout
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("❤️ Heart", key="heart", help="Predict Heart Disease"):
-            st.session_state['page'] = 'Heart'
-    with col2:
-        if st.button("🩸 Diabetes", key="diabetes", help="Predict Diabetes"):
-            st.session_state['page'] = 'Diabetes'
-    with col3:
-        if st.button("🧠 Brain Tumor", key="brain", help="Predict Brain Tumor"):
-            st.session_state['page'] = 'Brain'
-    col4, col5 = st.columns(2)
-    with col4:
-        if st.button("🟣 Kidney", key="kidney", help="Predict Kidney Disease"):
-            st.session_state['page'] = 'Kidney'
-    with col5:
-        if st.button("🟠 Liver", key="liver", help="Predict Liver Disease"):
-            st.session_state['page'] = 'Liver'
+    st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
 
-    # Logout button
-    st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
-    if st.button("Logout", key="logout"):
+    # Heart Card
+    if st.button("❤️ Heart", key="heart_card"):
+        st.session_state['page'] = 'Heart'
+    st.markdown(
+        """
+        <div class="card card-heart">
+            <div class="card-title">❤️ Heart</div>
+            <div class="card-subtitle">Predict Heart Disease</div>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+    # Diabetes Card
+    if st.button("🩸 Diabetes", key="diabetes_card"):
+        st.session_state['page'] = 'Diabetes'
+    st.markdown(
+        """
+        <div class="card card-diabetes">
+            <div class="card-title">🩸 Diabetes</div>
+            <div class="card-subtitle">Predict Diabetes</div>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+    # Brain Tumor Card
+    if st.button("🧠 Brain Tumor", key="brain_card"):
+        st.session_state['page'] = 'Brain'
+    st.markdown(
+        """
+        <div class="card card-brain">
+            <div class="card-title">🧠 Brain Tumor</div>
+            <div class="card-subtitle">Predict Brain Tumor</div>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+    # Kidney Card
+    if st.button("🟣 Kidney", key="kidney_card"):
+        st.session_state['page'] = 'Kidney'
+    st.markdown(
+        """
+        <div class="card card-kidney">
+            <div class="card-title">🟣 Kidney</div>
+            <div class="card-subtitle">Predict Kidney Disease</div>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+    # Liver Card
+    if st.button("🟠 Liver", key="liver_card"):
+        st.session_state['page'] = 'Liver'
+    st.markdown(
+        """
+        <div class="card card-liver">
+            <div class="card-title">🟠 Liver</div>
+            <div class="card-subtitle">Predict Liver Disease</div>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Logout
+    if st.button("Logout", key="logout_card"):
         st.session_state['logged_in'] = False
         st.session_state['current_user'] = None
         st.session_state['page'] = 'Login'
-    st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 # ===================== PREDICTION PAGES =====================
