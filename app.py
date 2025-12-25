@@ -38,7 +38,7 @@ def load_brain_model():
     FILE_ID = "1r7Kmf14ZGKQK3GSTk3nxPxfAyGpg2m_b"
     URL = f"https://drive.google.com/uc?id={FILE_ID}"
 
-    model_path = "brain_tumor_model.h5"
+    model_path = "brain_tumor_dataset.h5"
 
     if not os.path.exists(model_path):
         response = requests.get(URL)
