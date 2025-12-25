@@ -139,8 +139,25 @@ elif disease == "Diabetes":
             "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"
         ]
     )
-    st.subheader("Enter Patient Details (Diabetes)")
-    preg = st.number_input("Pregnancies", 0, 20, value=2)
-    glucose = st.number_input("Glucose", 0, 300, value=120)
-    bp = st.number_input("Blood Pressure", 0, 200, value=70)
-    skin = st.number_input("Skin Thickness", 0, 100)
+    skin = st.number_input("Skin Thickness", 0, 100, value=20)
+    insulin = st.number_input("Insulin", 0, 900, value=85)
+    bmi = st.number_input("BMI", 0.0, 70.0, value=28.5)
+    dpf = st.number_input("Diabetes Pedigree Function", 0.0, 3.0, value=0.5)
+    age = st.number_input("Age", 1, 120, value=32)
+
+    if st.button("🔍 Predict Diabetes"):
+        try:
+            if glucose > 180 or bmi > 40 or insulin > 300:
+                st.error("⚠️ Possible Diabetes Detected (Rule-Based Alert)")
+            else:
+                X_input = np.array([[preg, glucose, bp, skin, insulin, bmi, dpf, age]])
+                X_scaled = scaler.transform(X_input)
+                prediction = model.predict(X_scaled)[0]
+                st.error("⚠️ Diabetes Detected" if prediction == 1 else "✅ No Diabetes Detected")
+        except Exception as e:
+            st.error("Prediction failed")
+            st.code(str(e))
+
+st.markdown("---")
+st.markdown("Made with ❤️ by your ML buddy")
+
