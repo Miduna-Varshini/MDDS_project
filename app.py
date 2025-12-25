@@ -83,35 +83,45 @@ def login():
 # ===================== IMPROVED HOME DASHBOARD =====================
 # ===================== DASHBOARD-STYLE HOME PAGE =====================
 # ===================== FULL-WIDTH DASHBOARD-STYLE HOME PAGE =====================
+# ===================== FULL-WIDTH DASHBOARD-STYLE HOME PAGE (GREEN CARDS, WHITE BG, RED BORDER) =====================
 def home_dashboard():
     st.markdown(
         """
         <style>
+        /* Page background */
+        .stApp {
+            background-color: white;
+        }
+
         /* Container */
         .dashboard-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            padding: 0 10px;
+            padding: 20px;
         }
+
         /* Card style */
         .card {
             width: 100%;
             height: 120px;
             border-radius: 15px;
-            color: white;
+            color: black;
+            background-color: #4ade80; /* green */
+            border: 2px solid red; /* red border */
             padding: 20px;
             font-family: 'Arial', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
             cursor: pointer;
             text-align: left;
+            box-shadow: 0px 8px 15px rgba(0,0,0,0.25); /* shadow */
         }
         .card:hover {
             transform: scale(1.03);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0px 15px 25px rgba(0,0,0,0.35);
         }
         .card-title {
             font-size: 22px;
@@ -122,15 +132,10 @@ def home_dashboard():
             font-size: 14px;
             opacity: 0.9;
         }
-        /* Colors */
-        .card-heart { background: linear-gradient(135deg, #f87171, #ef4444); }
-        .card-diabetes { background: linear-gradient(135deg, #f472b6, #ec4899); }
-        .card-brain { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
-        .card-kidney { background: linear-gradient(135deg, #c4b5fd, #7c3aed); }
-        .card-liver { background: linear-gradient(135deg, #fb923c, #f97316); }
+
         /* Logout button */
         .logout-btn {
-            background-color: #ef4444;
+            background-color: red;
             color: white;
             border-radius: 10px;
             padding: 15px;
@@ -140,6 +145,7 @@ def home_dashboard():
             cursor: pointer;
             width: 100%;
             text-align: center;
+            box-shadow: 0px 8px 15px rgba(0,0,0,0.25);
         }
         .logout-btn:hover {
             background-color: #b91c1c;
@@ -149,8 +155,8 @@ def home_dashboard():
         unsafe_allow_html=True
     )
 
-    st.markdown(f"<h1 style='text-align:center; color:#1f2937'>🩺 Multi-Disease Diagnostic Portal</h1>", unsafe_allow_html=True)
-    st.markdown(f"<h3 style='text-align:center; color:#4b5563; margin-bottom:30px;'>Welcome <b>{st.session_state['current_user']}</b>! Select a disease:</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align:center; color:black'>🩺 Multi-Disease Diagnostic Portal</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align:center; color:black; margin-bottom:30px;'>Welcome <b>{st.session_state['current_user']}</b>! Select a disease:</h3>", unsafe_allow_html=True)
 
     st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
 
@@ -158,7 +164,7 @@ def home_dashboard():
     if st.button("❤️ Heart", key="heart_card"):
         st.session_state['page'] = 'Heart'
     st.markdown(
-        '<div class="card card-heart"><div class="card-title">❤️ Heart</div><div class="card-subtitle">Predict Heart Disease</div></div>',
+        '<div class="card"><div class="card-title">❤️ Heart</div><div class="card-subtitle">Predict Heart Disease</div></div>',
         unsafe_allow_html=True
     )
 
@@ -166,7 +172,7 @@ def home_dashboard():
     if st.button("🩸 Diabetes", key="diabetes_card"):
         st.session_state['page'] = 'Diabetes'
     st.markdown(
-        '<div class="card card-diabetes"><div class="card-title">🩸 Diabetes</div><div class="card-subtitle">Predict Diabetes</div></div>',
+        '<div class="card"><div class="card-title">🩸 Diabetes</div><div class="card-subtitle">Predict Diabetes</div></div>',
         unsafe_allow_html=True
     )
 
@@ -174,7 +180,7 @@ def home_dashboard():
     if st.button("🧠 Brain Tumor", key="brain_card"):
         st.session_state['page'] = 'Brain'
     st.markdown(
-        '<div class="card card-brain"><div class="card-title">🧠 Brain Tumor</div><div class="card-subtitle">Predict Brain Tumor</div></div>',
+        '<div class="card"><div class="card-title">🧠 Brain Tumor</div><div class="card-subtitle">Predict Brain Tumor</div></div>',
         unsafe_allow_html=True
     )
 
@@ -182,7 +188,7 @@ def home_dashboard():
     if st.button("🟣 Kidney", key="kidney_card"):
         st.session_state['page'] = 'Kidney'
     st.markdown(
-        '<div class="card card-kidney"><div class="card-title">🟣 Kidney</div><div class="card-subtitle">Predict Kidney Disease</div></div>',
+        '<div class="card"><div class="card-title">🟣 Kidney</div><div class="card-subtitle">Predict Kidney Disease</div></div>',
         unsafe_allow_html=True
     )
 
@@ -190,7 +196,7 @@ def home_dashboard():
     if st.button("🟠 Liver", key="liver_card"):
         st.session_state['page'] = 'Liver'
     st.markdown(
-        '<div class="card card-liver"><div class="card-title">🟠 Liver</div><div class="card-subtitle">Predict Liver Disease</div></div>',
+        '<div class="card"><div class="card-title">🟠 Liver</div><div class="card-subtitle">Predict Liver Disease</div></div>',
         unsafe_allow_html=True
     )
 
@@ -201,7 +207,6 @@ def home_dashboard():
         st.session_state['logged_in'] = False
         st.session_state['current_user'] = None
         st.session_state['page'] = 'Login'
-
 
 
 # ===================== PREDICTION PAGES =====================
