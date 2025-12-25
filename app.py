@@ -2,7 +2,9 @@ import streamlit as st
 import pickle
 import pandas as pd
 
-# Inject custom CSS
+# =========================
+# Custom CSS
+# =========================
 st.markdown("""
     <style>
     [data-testid="stSidebar"] {
@@ -61,7 +63,7 @@ MODELS = {
     "Diabetes": "models/diabetes_model.pkl"
 }
 
-# Manual feature schemas
+# Manual feature schemas (must match training dataset order!)
 FEATURES = {
     "Kidney": ["age", "bp", "sg", "al", "su"],
     "Liver": ["Age", "Gender", "Total_Bilirubin", "Direct_Bilirubin", "Alkaline_Phosphotase",
@@ -142,8 +144,10 @@ elif disease == "Diabetes":
 # =========================
 if st.button("Predict"):
     input_df = pd.DataFrame([input_data])
-    # Use manual schema instead of model.feature_names_in_
     input_df = input_df.reindex(columns=FEATURES[disease], fill_value=0)
-    input_scaled = scaler.transform(input_df)
+
+    # FIX: use .values to avoid feature name mismatch error
+    input_scaled = scaler.transform(input_df.values)
+
     pred = model.predict(input_scaled)[0]
     st.success(f"Prediction: {'Disease Detected' if pred == 1 else 'No Disease'}")
