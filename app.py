@@ -80,27 +80,78 @@ def login():
             st.error("Invalid username or password")
 
 # ===================== HOME DASHBOARD =====================
+# ===================== IMPROVED HOME DASHBOARD =====================
 def home_dashboard():
-    st.title("🩺 Multi-Disease Diagnostic Portal")
-    st.write(f"Welcome **{st.session_state['current_user']}**! Select a disease below:")
+    st.markdown(
+        """
+        <style>
+        .main-header {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            color: #ffffff;
+        }
+        .sub-header {
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #d1d5db;
+        }
+        .button-style {
+            padding: 20px 25px;
+            font-size: 18px;
+            margin: 10px;
+            border-radius: 12px;
+            background-color: #1f2937;
+            color: white;
+            border: 2px solid #4f46e5;
+            transition: all 0.2s ease;
+        }
+        .button-style:hover {
+            background-color: #4f46e5;
+            color: #fff;
+            transform: scale(1.05);
+        }
+        .logout-style {
+            margin-top: 30px;
+            background-color: #ef4444;
+            border: 2px solid #b91c1c;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+    st.markdown('<div class="main-header">🩺 Multi-Disease Diagnostic Portal</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sub-header">Welcome **{st.session_state["current_user"]}**! Select a disease below:</div>', unsafe_allow_html=True)
+
+    # Using columns for responsive layout
     col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("❤️ Heart"): st.session_state['page'] = 'Heart'
+        if st.button("❤️ Heart", key="heart", help="Predict Heart Disease"):
+            st.session_state['page'] = 'Heart'
     with col2:
-        if st.button("🩸 Diabetes"): st.session_state['page'] = 'Diabetes'
+        if st.button("🩸 Diabetes", key="diabetes", help="Predict Diabetes"):
+            st.session_state['page'] = 'Diabetes'
     with col3:
-        if st.button("🧠 Brain Tumor"): st.session_state['page'] = 'Brain'
+        if st.button("🧠 Brain Tumor", key="brain", help="Predict Brain Tumor"):
+            st.session_state['page'] = 'Brain'
     col4, col5 = st.columns(2)
     with col4:
-        if st.button("🟣 Kidney"): st.session_state['page'] = 'Kidney'
+        if st.button("🟣 Kidney", key="kidney", help="Predict Kidney Disease"):
+            st.session_state['page'] = 'Kidney'
     with col5:
-        if st.button("🟠 Liver"): st.session_state['page'] = 'Liver'
+        if st.button("🟠 Liver", key="liver", help="Predict Liver Disease"):
+            st.session_state['page'] = 'Liver'
 
-    if st.button("Logout"):
+    # Logout button
+    st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
+    if st.button("Logout", key="logout"):
         st.session_state['logged_in'] = False
         st.session_state['current_user'] = None
         st.session_state['page'] = 'Login'
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 # ===================== PREDICTION PAGES =====================
 def disease_page(title, model_loader, input_func=None, is_brain=False):
