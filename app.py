@@ -143,4 +143,4 @@ elif disease == "Diabetes":
     preg = st.number_input("Pregnancies", 0, 20, value=2)
     glucose = st.number_input("Glucose", 0, 300, value=120)
     bp = st.number_input("Blood Pressure", 0, 200, value=70)
-    skin = st.number_input("Skin Thickness", 0, 100
+    skin = st.number_input("Skin Thickness", 0, 100)
