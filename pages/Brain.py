@@ -23,8 +23,10 @@ def load_brain_model():
     model = load_model("brain_tumor_dataset.h5")
     return model
 
-
 model = load_brain_model()
+
+# Show model input shape for debugging
+st.write("Model input shape:", model.input_shape)
 
 # ================= IMAGE UPLOAD =================
 st.subheader("Upload MRI Image")
@@ -34,11 +36,25 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded MRI", use_column_width=True)
 
-    # Preprocess image (resize to model input size, e.g. 128x128)
-    img = image.resize((128, 128))
-    img_array = np.array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+    # ================= PREPROCESS IMAGE =================
+    # Get model input shape (ignore batch size)
+    input_shape = model.input_shape[1:]  # e.g., (86528,) or (128,128,3)
+    
+    if len(input_shape) == 1:
+        # Dense model expecting flattened input
+        # Calculate the side of square image if needed
+        side = int(np.sqrt(input_shape[0] / 3))
+        img = image.resize((side, side))
+        img_array = np.array(img) / 255.0
+        img_array = img_array.flatten()
+        img_array = np.expand_dims(img_array, axis=0)
+    else:
+        # CNN model expecting (H, W, C)
+        img = image.resize((input_shape[0], input_shape[1]))
+        img_array = np.array(img) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
+    # ================= PREDICTION =================
     if st.button("🔍 Predict Brain Tumor"):
         try:
             prediction = model.predict(img_array)[0][0]
