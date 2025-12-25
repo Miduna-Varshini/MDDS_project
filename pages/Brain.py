@@ -1,27 +1,32 @@
 import streamlit as st
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 from PIL import Image
+import requests
+from io import BytesIO
 
-# ---------------- PAGE CONFIG ----------------
-st.set_page_config(
-    page_title="Brain Tumor Prediction",
-    page_icon="🧠",
-    layout="centered"
-)
-
+# ================= PAGE CONFIG =================
+st.set_page_config(page_title="Brain Tumor Prediction", layout="centered")
 st.title("🧠 Brain Tumor Prediction")
-st.caption("Upload MRI images to check for brain tumor")
 
-# ---------------- LOAD MODEL ----------------
+# ================= LOAD MODEL =================
 @st.cache_resource
 def load_brain_model():
-    model = load_model("models/brain_tumor_dataset.h5")
+    # Replace with your actual Google Drive file ID
+    FILE_ID = "1r7Kmf14ZGKQK3GSTk3nxPxfAyGpg2m_b"
+    URL = f"https://drive.google.com/uc?id={FILE_ID}"
+    
+    response = requests.get(URL)
+    with open("brain_tumor_dataset.h5", "wb") as f:
+        f.write(response.content)
+    
+    model = load_model("brain_tumor_dataset.h5")
     return model
 
 model = load_brain_model()
 
-# ---------------- IMAGE UPLOAD ----------------
+# ================= IMAGE UPLOAD =================
 st.subheader("Upload MRI Image")
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
@@ -29,15 +34,15 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded MRI", use_column_width=True)
 
-    # Preprocess image (resize to 128x128, normalize)
+    # Preprocess image (resize to model input size, e.g. 128x128)
     img = image.resize((128, 128))
     img_array = np.array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 128, 128, 3)
+    img_array = np.expand_dims(img_array, axis=0)
 
     if st.button("🔍 Predict Brain Tumor"):
         try:
-            pred = model.predict(img_array)[0][0]
-            if pred > 0.5:
+            prediction = model.predict(img_array)[0][0]
+            if prediction > 0.5:
                 st.error("⚠️ Brain Tumor Detected")
             else:
                 st.success("✅ No Brain Tumor Detected")
@@ -45,6 +50,5 @@ if uploaded_file is not None:
             st.error("Prediction failed")
             st.code(str(e))
 
-# ---------------- DISCLAIMER ----------------
 st.markdown("---")
-st.caption("⚠️ For educational purposes only. Consult a doctor for medical advice.")
+st.markdown("Made with ❤️ by your ML buddy")
