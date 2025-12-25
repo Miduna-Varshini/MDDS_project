@@ -62,23 +62,23 @@ if page == "Home":
 # ---------------- HEART PAGE ----------------
 elif page == "Heart":
     # Import Heart page code here
-    import pages.1_Heart
+    import pages.Heart
 
 # ---------------- KIDNEY PAGE ----------------
 elif page == "Kidney":
-    import pages.2_Kidney
+    import pages.Kidney
 
 # ---------------- LIVER PAGE ----------------
 elif page == "Liver":
-    import pages.3_Liver
+    import pages.Liver
 
 # ---------------- DIABETES PAGE ----------------
 elif page == "Diabetes":
-    import pages.4_Diabetes
+    import pages.Diabetes
 
 # ---------------- BRAIN TUMOR PAGE ----------------
 elif page == "Brain Tumor":
-    import pages.5_Brain_Tumor
+    import pages.Brain_Tumor
 
 # ---------------- FOOTER ----------------
 st.markdown("---")
