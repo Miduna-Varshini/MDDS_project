@@ -13,9 +13,8 @@ st.title("🧠 Brain Tumor Prediction")
 # ================= LOAD MODEL =================
 @st.cache_resource
 def load_brain_model():
-    # Replace with your actual Google Drive file ID
     FILE_ID = "1r7Kmf14ZGKQK3GSTk3nxPxfAyGpg2m_b"
-    URL = f"https://drive.google.com/uc?id={FILE_ID}"
+    URL = f"https://drive.google.com/uc?id={FILE_ID}&export=download"
     
     response = requests.get(URL)
     with open("brain_tumor_dataset.h5", "wb") as f:
@@ -23,6 +22,7 @@ def load_brain_model():
     
     model = load_model("brain_tumor_dataset.h5")
     return model
+
 
 model = load_brain_model()
 
