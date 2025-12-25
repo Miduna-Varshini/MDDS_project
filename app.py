@@ -20,7 +20,6 @@ model, scaler, FEATURES = load_model()
 # ================= INPUTS =================
 st.subheader("Enter Patient Details")
 
-# Create input fields for 10 features
 age = st.number_input("Age", 0, 120, value=45)
 bp = st.number_input("Blood Pressure (BP)", 0, 200, value=80)
 sg = st.number_input("Specific Gravity (SG)", 1.0, 1.05, value=1.020)
@@ -35,20 +34,19 @@ pcv = st.number_input("Packed Cell Volume (PCV)", 0, 60, value=44)
 # ================= PREDICTION =================
 if st.button("🔍 Predict Kidney Disease"):
     try:
-        # Create input array
-        X_input = np.array([[age, bp, sg, al, su, bgr, bu, sc, hemo, pcv]])
-
-        # Scale features
-        X_scaled = scaler.transform(X_input)
-
-        # Predict
-        prediction = model.predict(X_scaled)[0]
-
-        # Show result
-        if prediction == 1:
-            st.error("⚠️ Chronic Kidney Disease Detected")
+        # Rule-based safety check for obvious CKD
+        if bu > 90 or sc > 5 or hemo < 10 or pcv < 28:
+            st.error("⚠️ Chronic Kidney Disease Detected (Rule-Based Alert)")
         else:
-            st.success("✅ No Chronic Kidney Disease Detected")
+            # Prepare input for model
+            X_input = np.array([[age, bp, sg, al, su, bgr, bu, sc, hemo, pcv]])
+            X_scaled = scaler.transform(X_input)
+            prediction = model.predict(X_scaled)[0]
+
+            if prediction == 1:
+                st.error("⚠️ Chronic Kidney Disease Detected")
+            else:
+                st.success("✅ No Chronic Kidney Disease Detected")
 
     except Exception as e:
         st.error("Prediction failed")
