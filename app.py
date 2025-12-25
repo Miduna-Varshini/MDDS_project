@@ -139,6 +139,10 @@ elif disease == "Diabetes":
             "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"
         ]
     )
+    st.subheader("Enter Patient Details (Diabetes)")
+    preg = st.number_input("Pregnancies", 0, 20, value=2)
+    glucose = st.number_input("Glucose", 0, 300, value=120)
+    bp = st.number_input("Blood Pressure", 0, 200, value=70)
     skin = st.number_input("Skin Thickness", 0, 100, value=20)
     insulin = st.number_input("Insulin", 0, 900, value=85)
     bmi = st.number_input("BMI", 0.0, 70.0, value=28.5)
@@ -157,7 +161,4 @@ elif disease == "Diabetes":
         except Exception as e:
             st.error("Prediction failed")
             st.code(str(e))
-
-st.markdown("---")
-st.markdown("Made with ❤️ by your ML buddy")
 
