@@ -84,125 +84,147 @@ def login():
 # ===================== DASHBOARD-STYLE HOME PAGE =====================
 # ===================== FULL-WIDTH DASHBOARD-STYLE HOME PAGE =====================
 # ===================== FULL-WIDTH DASHBOARD-STYLE HOME PAGE (GREEN CARDS, WHITE BG, RED BORDER) =====================
+# ===================== GLOBAL STYLING (White BG, Green Cards, Red Borders) =====================
+st.markdown(
+    """
+    <style>
+    /* Page background */
+    .stApp {
+        background-color: white;
+    }
+
+    /* Auth card for signup/login */
+    .auth-card {
+        background-color: #4ade80;  /* Green card */
+        color: black;
+        border: 2px solid red;      
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 450px;
+        margin: auto;
+        margin-top: 50px;
+        box-shadow: 0px 10px 20px rgba(0,0,0,0.25); 
+        text-align: center;
+    }
+
+    /* Input fields */
+    div.stTextInput > label, div.stTextInput > div > input {
+        color: black;
+        font-weight: bold;
+    }
+    div.stTextInput > label, div.stTextInput > div > input[type=password] {
+        color: black;
+        font-weight: bold;
+    }
+
+    /* Buttons */
+    div.stButton > button {
+        background-color: red;   
+        color: white;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: bold;
+        box-shadow: 0px 5px 10px rgba(0,0,0,0.25);
+        cursor: pointer;
+    }
+    div.stButton > button:hover {
+        background-color: #b91c1c;
+    }
+
+    /* Dashboard container */
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    /* Dashboard cards */
+    .card {
+        width: 100%;
+        height: 120px;
+        border-radius: 15px;
+        color: black;
+        background-color: #4ade80; 
+        border: 2px solid red; 
+        padding: 20px;
+        font-family: 'Arial', sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: transform 0.2s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        text-align: left;
+        box-shadow: 0px 8px 15px rgba(0,0,0,0.25); 
+    }
+    .card:hover {
+        transform: scale(1.03);
+        box-shadow: 0px 15px 25px rgba(0,0,0,0.35);
+    }
+    .card-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .card-subtitle {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    /* Logout button */
+    .logout-btn {
+        background-color: red;
+        color: white;
+        border-radius: 10px;
+        padding: 15px;
+        font-weight: bold;
+        margin-top: 20px;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0px 8px 15px rgba(0,0,0,0.25);
+    }
+    .logout-btn:hover {
+        background-color: #b91c1c;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="auth-card">', unsafe_allow_html=True)
+
+username = st.text_input("Enter username")
+password = st.text_input("Enter password", type="password")
+if st.button("Signup"):
+    # your signup logic
+
+st.markdown('</div>', unsafe_allow_html=True)
 def home_dashboard():
-    st.markdown(
-        """
-        <style>
-        /* Page background */
-        .stApp {
-            background-color: white;
-        }
-
-        /* Container */
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
-        /* Card style */
-        .card {
-            width: 100%;
-            height: 120px;
-            border-radius: 15px;
-            color: black;
-            background-color: #4ade80; /* green */
-            border: 2px solid red; /* red border */
-            padding: 20px;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            text-align: left;
-            box-shadow: 0px 8px 15px rgba(0,0,0,0.25); /* shadow */
-        }
-        .card:hover {
-            transform: scale(1.03);
-            box-shadow: 0px 15px 25px rgba(0,0,0,0.35);
-        }
-        .card-title {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .card-subtitle {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        /* Logout button */
-        .logout-btn {
-            background-color: red;
-            color: white;
-            border-radius: 10px;
-            padding: 15px;
-            font-weight: bold;
-            margin-top: 20px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0px 8px 15px rgba(0,0,0,0.25);
-        }
-        .logout-btn:hover {
-            background-color: #b91c1c;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
     st.markdown(f"<h1 style='text-align:center; color:black'>🩺 Multi-Disease Diagnostic Portal</h1>", unsafe_allow_html=True)
     st.markdown(f"<h3 style='text-align:center; color:black; margin-bottom:30px;'>Welcome <b>{st.session_state['current_user']}</b>! Select a disease:</h3>", unsafe_allow_html=True)
 
     st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
 
-    # Heart Card
-    if st.button("❤️ Heart", key="heart_card"):
-        st.session_state['page'] = 'Heart'
-    st.markdown(
-        '<div class="card"><div class="card-title">❤️ Heart</div><div class="card-subtitle">Predict Heart Disease</div></div>',
-        unsafe_allow_html=True
-    )
+    cards = [
+        ("❤️ Heart", "Predict Heart Disease", "Heart"),
+        ("🩸 Diabetes", "Predict Diabetes", "Diabetes"),
+        ("🧠 Brain Tumor", "Predict Brain Tumor", "Brain"),
+        ("🟣 Kidney", "Predict Kidney Disease", "Kidney"),
+        ("🟠 Liver", "Predict Liver Disease", "Liver")
+    ]
 
-    # Diabetes Card
-    if st.button("🩸 Diabetes", key="diabetes_card"):
-        st.session_state['page'] = 'Diabetes'
-    st.markdown(
-        '<div class="card"><div class="card-title">🩸 Diabetes</div><div class="card-subtitle">Predict Diabetes</div></div>',
-        unsafe_allow_html=True
-    )
-
-    # Brain Tumor Card
-    if st.button("🧠 Brain Tumor", key="brain_card"):
-        st.session_state['page'] = 'Brain'
-    st.markdown(
-        '<div class="card"><div class="card-title">🧠 Brain Tumor</div><div class="card-subtitle">Predict Brain Tumor</div></div>',
-        unsafe_allow_html=True
-    )
-
-    # Kidney Card
-    if st.button("🟣 Kidney", key="kidney_card"):
-        st.session_state['page'] = 'Kidney'
-    st.markdown(
-        '<div class="card"><div class="card-title">🟣 Kidney</div><div class="card-subtitle">Predict Kidney Disease</div></div>',
-        unsafe_allow_html=True
-    )
-
-    # Liver Card
-    if st.button("🟠 Liver", key="liver_card"):
-        st.session_state['page'] = 'Liver'
-    st.markdown(
-        '<div class="card"><div class="card-title">🟠 Liver</div><div class="card-subtitle">Predict Liver Disease</div></div>',
-        unsafe_allow_html=True
-    )
+    for title, subtitle, page_name in cards:
+        if st.button(title, key=f"{page_name}_card"):
+            st.session_state['page'] = page_name
+        st.markdown(
+            f'<div class="card"><div class="card-title">{title}</div><div class="card-subtitle">{subtitle}</div></div>',
+            unsafe_allow_html=True
+        )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Logout button full width
     if st.button("Logout", key="logout_card"):
         st.session_state['logged_in'] = False
         st.session_state['current_user'] = None
