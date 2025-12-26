@@ -7,16 +7,14 @@ st.title("🤖 AI Health Assistant")
 st.write("Ask questions about symptoms, diseases, reports, or prevention.")
 
 # Load API key from secrets
-api_key = st.secrets.get("GEMINI_API_KEY")
-
+api_key = st.secrets["GEMINI_API_KEY"]
 if not api_key:
     st.error("GEMINI_API_KEY not found in secrets.toml")
     st.stop()
 
 # Configure Gemini
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-pro")
-
+model = genai.GenerativeModel("models/gemini-1.5-pro")
 # Initialize chat
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat(history=[])
