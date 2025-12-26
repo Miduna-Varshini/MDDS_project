@@ -3,13 +3,10 @@ import numpy as np
 import pickle
 from datetime import datetime
 from fpdf import FPDF
-from tensorflow.keras.models import load_model
 from PIL import Image
-import requests
-import io
 import speech_recognition as sr
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase
-import av
+import io
+import tempfile
 
 # ===================== SESSION INIT =====================
 if 'page' not in st.session_state:
@@ -31,12 +28,10 @@ def create_pdf(username, disease, result_text, image=None):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Title
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, "Multi Disease Diagnostic Report", ln=True, align="C")
     pdf.ln(5)
 
-    # Metadata
     pdf.set_font("Arial", size=12)
     login_time = datetime.now().strftime("%d-%m-%Y %I:%M %p")
     content = f"""
@@ -51,7 +46,6 @@ Prediction Result:
     pdf.multi_cell(0, 8, safe_text)
     pdf.ln(5)
 
-    # Brain Image Section
     if image is not None:
         pdf.set_font("Arial", "B", 12)
         pdf.cell(0, 10, "Uploaded MRI Image:", ln=True)
@@ -74,15 +68,11 @@ def load_pickle_model(path):
         scaler = data['scaler']
     return model, scaler
 
+# Placeholder Brain Tumor loader (cloud safe)
 @st.cache_resource
 def load_brain_model():
-    FILE_ID = "1r7Kmf14ZGKQK3GSTk3nxPxfAyGpg2m_b"  # Replace with your file ID
-    URL = f"https://drive.google.com/uc?id={FILE_ID}&export=download"
-    response = requests.get(URL)
-    with open("brain_tumor_dataset.h5", "wb") as f:
-        f.write(response.content)
-    model = load_model("brain_tumor_dataset.h5")
-    return model
+    st.warning("Brain Tumor prediction currently disabled on cloud due to TensorFlow limitation.")
+    return None
 
 # ===================== SIGNUP & LOGIN =====================
 def signup():
@@ -113,154 +103,29 @@ def login():
 
 # ===================== HOME DASHBOARD =====================
 def home_dashboard():
-    st.markdown(
-        """
-        <style>
-        .stApp {background-color: white;}
-        .dashboard-container {display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px;}
-        .card {width: 100%; height: 120px; border-radius: 15px; color: black; background-color: #4ade80; border: 2px solid red; padding: 20px;
-            font-family: 'Arial', sans-serif; display: flex; flex-direction: column; justify-content: center; cursor: pointer; text-align: left;
-            box-shadow: 0px 8px 15px rgba(0,0,0,0.25); transition: transform 0.2s ease, box-shadow 0.3s ease;}
-        .card:hover {transform: scale(1.03); box-shadow: 0px 15px 25px rgba(0,0,0,0.35);}
-        .card-title {font-size: 22px; font-weight: bold; margin-bottom: 5px;}
-        .card-subtitle {font-size: 14px; opacity: 0.9;}
-        .logout-btn {background-color: red; color: white; border-radius: 10px; padding: 15px; font-weight: bold; margin-top: 20px; width: 100%; cursor: pointer; text-align:center;}
-        .logout-btn:hover {background-color: #b91c1c;}
-        </style>
-        """, unsafe_allow_html=True)
-
     st.markdown(f"<h1 style='text-align:center; color:black'>🩺 Multi-Disease Diagnostic Portal</h1>", unsafe_allow_html=True)
     st.markdown(f"<h3 style='text-align:center; color:black; margin-bottom:30px;'>Welcome <b>{st.session_state['current_user']}</b>! Select a disease:</h3>", unsafe_allow_html=True)
-    st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
 
-    # Cards
-    # Cards
-    for title, key, subtitle, page in [
+    cards = [
         ("❤️ Heart", "heart_card", "Predict Heart Disease", "Heart"),
         ("🩸 Diabetes", "diabetes_card", "Predict Diabetes", "Diabetes"),
         ("🧠 Brain Tumor", "brain_card", "Predict Brain Tumor", "Brain"),
         ("🟣 Kidney", "kidney_card", "Predict Kidney Disease", "Kidney"),
         ("🟠 Liver", "liver_card", "Predict Liver Disease", "Liver"),
         ("🎙️ Speech to Text", "speech_card", "Voice Based Input", "Speech")
-    ]:
+    ]
+
+    for i, (title, key, subtitle, page) in enumerate(cards):
         if st.button(title, key=key):
             st.session_state['page'] = page
-
-        st.markdown(
-            f"""
-            <div class="card">
-                <div class="card-title">{title}</div>
-                <div class="card-subtitle">{subtitle}</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
     if st.button("Logout", key="logout_card"):
         st.session_state['logged_in'] = False
         st.session_state['current_user'] = None
         st.session_state['page'] = 'Login'
 
-
-
 # ===================== INPUT FUNCTIONS =====================
-# ===================== APPOINTMENT BOOKING & HOSPITALS =====================
-def appointment_booking(disease):
-    st.subheader("📅 Doctor Consultation")
-    doctor_map = {
-        "Heart Disease": ("Cardiologist", "https://www.apollo247.com/specialties/cardiology"),
-        "Diabetes": ("Diabetologist", "https://www.apollo247.com/specialties/diabetology"),
-        "Kidney Disease": ("Nephrologist", "https://www.apollo247.com/specialties/nephrology"),
-        "Liver Disease": ("Hepatologist", "https://www.apollo247.com/specialties/hepatology"),
-        "Brain Tumor": ("Neurologist", "https://www.apollo247.com/specialties/neurology")
-    }
-    doctor, link = doctor_map.get(disease, ("General Physician", "https://www.apollo247.com"))
-    st.markdown(f"👨‍⚕️ **Recommended Doctor:** {doctor}")
-    st.warning("⚠️ Please consult a certified doctor for confirmation")
-    st.markdown(f"🔗 **Online Consultation:** [Book Appointment]({link})")
-
-    # Save appointment history
-    username = st.session_state['current_user']
-    if username not in st.session_state['appointments']:
-        st.session_state['appointments'][username] = []
-    if st.button("✅ Save Appointment to History"):
-        st.session_state['appointments'][username].append({
-            "disease": disease,
-            "doctor": doctor,
-            "link": link,
-            "time": str(datetime.now())
-        })
-        st.success("Appointment added to your history!")
-
-    # Display appointment history
-    if username in st.session_state['appointments'] and st.session_state['appointments'][username]:
-        st.subheader("📋 Your Appointment History")
-        for appt in st.session_state['appointments'][username]:
-            st.write(f"- **{appt['disease']}** with {appt['doctor']} ➡️ [Link]({appt['link']}) (Saved: {appt['time']})")
-
-def show_hospitals(disease):
-    st.subheader("🏥 Nearby Hospitals / Clinics")
-    search_map = {
-        "Heart Disease": "cardiology hospital near me",
-        "Diabetes": "diabetes clinic near me",
-        "Kidney Disease": "nephrology hospital near me",
-        "Liver Disease": "hepatology hospital near me",
-        "Brain Tumor": "neurology hospital near me"
-    }
-    query = search_map.get(disease, "hospital near me")
-    maps_link = f"https://www.google.com/maps/search/{query.replace(' ', '+')}"
-    st.markdown(f"🔍 **Search Hospitals:** [Click Here]({maps_link})")
-# ===================== LIVE SPEECH TO TEXT =====================
-def speech_to_text_page():
-    st.header("🎙️ Live Speech to Text")
-    st.write("Speak through your microphone and convert speech to text")
-
-    recognizer = sr.Recognizer()
-
-    class AudioProcessor(AudioProcessorBase):
-        def __init__(self):
-            self.audio_data = b""
-
-        def recv(self, frame: av.AudioFrame):
-            audio = frame.to_ndarray().tobytes()
-            self.audio_data += audio
-            return frame
-
-    ctx = webrtc_streamer(
-        key="speech-to-text",
-        audio_processor_factory=AudioProcessor,
-        media_stream_constraints={"audio": True, "video": False},
-    )
-
-    if ctx.audio_processor:
-        if st.button("📝 Convert Speech to Text"):
-            try:
-                audio_data = ctx.audio_processor.audio_data
-
-                audio = sr.AudioData(
-                    audio_data,
-                    sample_rate=48000,
-                    sample_width=2
-                )
-
-                text = recognizer.recognize_google(audio)
-                st.success("Recognized Text:")
-                st.write(text)
-
-                # OPTIONAL: Auto disease suggestion
-                if "chest pain" in text.lower():
-                    st.info("💡 Possible Heart-related symptom detected")
-                if "sugar" in text.lower():
-                    st.info("💡 Possible Diabetes-related symptom detected")
-
-            except sr.UnknownValueError:
-                st.error("Could not understand audio")
-            except sr.RequestError as e:
-                st.error(f"API Error: {e}")
-
 def heart_inputs():
     age = st.number_input("Age", 0, 120, 52)
     sex = st.selectbox("Sex (0=Female, 1=Male)", [0,1])
@@ -315,7 +180,80 @@ def liver_inputs():
     ag_ratio = st.number_input("Albumin/Globulin Ratio",0.0,3.0,0.9)
     return [age, gender_val, total_bilirubin, direct_bilirubin, alk_phos, alt, ast, total_proteins, albumin, ag_ratio]
 
-# ===================== DISEASE PREDICTION PAGE =====================
+# ===================== APPOINTMENTS & HOSPITALS =====================
+def appointment_booking(disease):
+    st.subheader("📅 Doctor Consultation")
+    doctor_map = {
+        "Heart Disease": ("Cardiologist", "https://www.apollo247.com/specialties/cardiology"),
+        "Diabetes": ("Diabetologist", "https://www.apollo247.com/specialties/diabetology"),
+        "Kidney Disease": ("Nephrologist", "https://www.apollo247.com/specialties/nephrology"),
+        "Liver Disease": ("Hepatologist", "https://www.apollo247.com/specialties/hepatology"),
+        "Brain Tumor": ("Neurologist", "https://www.apollo247.com/specialties/neurology")
+    }
+    doctor, link = doctor_map.get(disease, ("General Physician", "https://www.apollo247.com"))
+    st.markdown(f"👨‍⚕️ **Recommended Doctor:** {doctor}")
+    st.warning("⚠️ Please consult a certified doctor for confirmation")
+    st.markdown(f"🔗 **Online Consultation:** [Book Appointment]({link})")
+
+    username = st.session_state['current_user']
+    if username not in st.session_state['appointments']:
+        st.session_state['appointments'][username] = []
+    if st.button("✅ Save Appointment to History"):
+        st.session_state['appointments'][username].append({
+            "disease": disease,
+            "doctor": doctor,
+            "link": link,
+            "time": str(datetime.now())
+        })
+        st.success("Appointment added to your history!")
+
+    if username in st.session_state['appointments'] and st.session_state['appointments'][username]:
+        st.subheader("📋 Your Appointment History")
+        for appt in st.session_state['appointments'][username]:
+            st.write(f"- **{appt['disease']}** with {appt['doctor']} ➡️ [Link]({appt['link']}) (Saved: {appt['time']})")
+
+def show_hospitals(disease):
+    st.subheader("🏥 Nearby Hospitals / Clinics")
+    search_map = {
+        "Heart Disease": "cardiology hospital near me",
+        "Diabetes": "diabetes clinic near me",
+        "Kidney Disease": "nephrology hospital near me",
+        "Liver Disease": "hepatology hospital near me",
+        "Brain Tumor": "neurology hospital near me"
+    }
+    query = search_map.get(disease, "hospital near me")
+    maps_link = f"https://www.google.com/maps/search/{query.replace(' ', '+')}"
+    st.markdown(f"🔍 **Search Hospitals:** [Click Here]({maps_link})")
+
+# ===================== SPEECH TO TEXT (UPLOAD ONLY) =====================
+def speech_to_text_page():
+    st.header("🎙️ Speech to Text (Upload Audio)")
+    audio_file = st.file_uploader("Upload WAV file", type=["wav"])
+    if audio_file:
+        recognizer = sr.Recognizer()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+            f.write(audio_file.read())
+            file_path = f.name
+
+        audio_data = sr.AudioFile(file_path)
+        with audio_data as source:
+            audio = recognizer.record(source)
+
+        try:
+            text = recognizer.recognize_google(audio)
+            st.success("Recognized Text:")
+            st.text_area("Result", text, height=150)
+
+            if "chest pain" in text.lower():
+                st.info("💡 Possible Heart-related symptom detected")
+            if "sugar" in text.lower():
+                st.info("💡 Possible Diabetes-related symptom detected")
+        except sr.UnknownValueError:
+            st.error("Could not understand audio")
+        except sr.RequestError as e:
+            st.error(f"API Error: {e}")
+
+# ===================== DISEASE PREDICTION =====================
 def disease_page(title, model_loader, input_func=None, is_brain=False):
     st.header(f"{title} Prediction")
     inputs = None
@@ -332,19 +270,8 @@ def disease_page(title, model_loader, input_func=None, is_brain=False):
     if st.button(f"🔍 Predict {title}"):
         try:
             if is_brain:
-                model = model_loader()
-                input_shape = model.input_shape[1:]
-                if len(input_shape)==1:
-                    side = int(np.sqrt(input_shape[0]/3))
-                    img = image.resize((side, side))
-                    X = np.array(img)/255.0
-                    X = X.flatten().reshape(1,-1)
-                else:
-                    img = image.resize((input_shape[0], input_shape[1]))
-                    X = np.array(img)/255.0
-                    X = np.expand_dims(X,0)
-                pred = model.predict(X)[0][0]
-                result_text = f"{title} Result: {'⚠️ Detected' if pred>0.5 else '✅ Not Detected'}"
+                st.warning("Brain Tumor prediction disabled on cloud.")
+                result_text = "⚠️ Prediction unavailable in cloud version"
             else:
                 model, scaler = model_loader()
                 X = np.array([inputs])
@@ -352,7 +279,6 @@ def disease_page(title, model_loader, input_func=None, is_brain=False):
                 pred = model.predict(X_scaled)[0]
                 result_text = f"{title} Result: {'⚠️ Detected' if pred==1 else '✅ Not Detected'}"
 
-            # Show result & appointments
             if '⚠️' in result_text:
                 st.error(result_text)
                 appointment_booking(title)
@@ -360,7 +286,6 @@ def disease_page(title, model_loader, input_func=None, is_brain=False):
             else:
                 st.success(result_text)
 
-            # PDF report
             pdf_bytes = create_pdf(
                 username=st.session_state['current_user'],
                 disease=title,
@@ -373,7 +298,6 @@ def disease_page(title, model_loader, input_func=None, is_brain=False):
                 file_name=f"{title.replace(' ','_')}_Report.pdf",
                 mime="application/pdf"
             )
-
         except Exception as e:
             st.error("Prediction failed")
             st.code(str(e))
