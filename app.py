@@ -6,6 +6,9 @@ from fpdf import FPDF
 from PIL import Image
 import speech_recognition as sr
 import tempfile
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import img_to_array
+import numpy as np
 
 # ===================== SESSION INIT =====================
 if 'page' not in st.session_state:
@@ -82,10 +85,9 @@ def load_pickle_model(path):
     return model, scaler
 
 @st.cache_resource
-def load_brain_model():
-    st.warning("Brain Tumor prediction disabled on cloud.")
-    return None
-
+def load_brain_model(path="models/brain_tumor_model.h5"):
+    model = load_model(path)
+    return model
 # ===================== SIGNUP & LOGIN =====================
 def signup():
     st.title("📝 Signup")
@@ -192,7 +194,37 @@ def liver_inputs():
     albumin = st.number_input("Albumin",1.0,6.0,3.1)
     ag_ratio = st.number_input("Albumin/Globulin Ratio",0.0,3.0,0.9)
     return [age,gender_val,total_bilirubin,direct_bilirubin,alk_phos,alt,ast,total_proteins,albumin,ag_ratio]
+def brain_tumor_predict_page():
+    st.header("🧠 Brain Tumor Prediction")
+    uploaded_file = st.file_uploader("Upload MRI Image...", type=["jpg","jpeg","png"])
+    if uploaded_file:
+        image = Image.open(uploaded_file).convert("RGB")
+        st.image(image, caption="Uploaded MRI", use_column_width=True)
 
+        if st.button("🔍 Predict Brain Tumor"):
+            try:
+                model = load_brain_model()
+                img = image.resize((128,128))  # resize to model input size
+                img_array = img_to_array(img)/255.0
+                img_array = np.expand_dims(img_array, axis=0)
+                pred = model.predict(img_array)[0][0]
+                result_text = "⚠️ Tumor Detected" if pred>0.5 else "✅ No Tumor Detected"
+                st.success(result_text)
+
+                pdf_bytes = create_pdf(
+                    username=st.session_state['current_user'],
+                    disease="Brain Tumor",
+                    result_text=result_text,
+                    image=image
+                )
+                st.download_button("📄 Download PDF Report", pdf_bytes, "Brain_Tumor_Report.pdf", "application/pdf")
+
+                appointment_booking("Brain Tumor")
+            except Exception as e:
+                st.error("Prediction failed")
+                st.code(str(e))
+
+    st.button("⬅️ Back", on_click=lambda: st.session_state.update({'page':'Home'}))
 # ===================== APPOINTMENTS =====================
 def appointment_booking(disease):
     st.subheader("📅 Doctor Consultation")
