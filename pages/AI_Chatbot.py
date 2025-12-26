@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
+# Page config
 st.set_page_config(page_title="AI Health Assistant", page_icon="🤖")
 
 st.title("🤖 AI Health Assistant")
@@ -15,12 +16,10 @@ if not api_key:
 # Configure Gemini API
 genai.configure(api_key=api_key)
 
-# Use a valid model (text-bison-001)
-model = genai.GenerativeModel("models/gemini-2.0-flash")
+# Use a valid Gemini model
+model = genai.GenerativeModel("models/gemini-2.0-flash")  # Valid model
 
-
-
-# Initialize chat
+# Initialize chat session in Streamlit state
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat(history=[])
 
@@ -32,7 +31,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Input
+# User input
 user_input = st.chat_input("Ask your health question...")
 
 if user_input:
@@ -43,6 +42,8 @@ if user_input:
     try:
         response = st.session_state.chat.send_message(user_input)
         reply = response.text
+    except genai.ErrorQuotaExceeded:
+        reply = "⚠️ Quota exceeded. Please try again later or upgrade your plan."
     except Exception as e:
         reply = f"⚠️ Error: {e}"
 
