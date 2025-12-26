@@ -11,6 +11,90 @@ import tempfile
 # ===================== SESSION INIT =====================
 if 'page' not in st.session_state:
     st.session_state['page'] = 'Signup'
+
+# ===================== PAGES =====================
+def signup():
+    st.title("📝 Signup")
+    username = st.text_input("Enter username")
+    password = st.text_input("Enter password", type="password")
+    if st.button("Signup"):
+        st.success("Signup successful! Please login.")
+
+def login():
+    st.title("🔑 Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        st.success("Login successful!")
+
+def brain_page():
+    st.title("🧠 Brain Tumor")
+    st.info("Brain page content goes here")
+
+def diabetes_page():
+    st.title("🩸 Diabetes")
+    st.info("Diabetes page content goes here")
+
+def heart_page():
+    st.title("❤️ Heart Disease")
+    st.info("Heart page content goes here")
+
+def kidney_page():
+    st.title("🟣 Kidney Disease")
+    st.info("Kidney page content goes here")
+
+def liver_page():
+    st.title("🟠 Liver Disease")
+    st.info("Liver page content goes here")
+
+def ai_chatbot_page():
+    st.title("🤖 AI Chatbot")
+    st.info("AI Chatbot content goes here")
+
+def speech_to_text_page():
+    st.title("🎙️ Speech to Text")
+    st.info("Speech-to-Text content goes here")
+
+# ===================== SIDEBAR NAVIGATION =====================
+st.sidebar.title("Navigation")
+page = st.sidebar.radio(
+    "Go to",
+    [
+        "Signup",
+        "Login",
+        "Brain",
+        "Diabetes",
+        "Heart",
+        "Kidney",
+        "Liver",
+        "AI Chatbot",
+        "Speech to Text"
+    ]
+)
+
+# ===================== DISPLAY PAGE =====================
+if page == "Signup":
+    signup()
+elif page == "Login":
+    login()
+elif page == "Brain":
+    brain_page()
+elif page == "Diabetes":
+    diabetes_page()
+elif page == "Heart":
+    heart_page()
+elif page == "Kidney":
+    kidney_page()
+elif page == "Liver":
+    liver_page()
+elif page == "AI Chatbot":
+    ai_chatbot_page()
+elif page == "Speech to Text":
+    speech_to_text_page()
+
+# ===================== SESSION INIT =====================
+if 'page' not in st.session_state:
+    st.session_state['page'] = 'Signup'
 if 'users' not in st.session_state:
     st.session_state['users'] = {}
 if 'logged_in' not in st.session_state:
