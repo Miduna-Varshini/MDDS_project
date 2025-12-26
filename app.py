@@ -24,14 +24,46 @@ if 'report' not in st.session_state:
     st.session_state['report'] = ""
 
 # ===================== PDF CREATOR =====================
-def create_pdf(text):
+def create_pdf(username, disease, result_text, image=None):
     pdf = FPDF()
     pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    # Title
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Multi Disease Diagnostic Report", ln=True, align="C")
+    pdf.ln(5)
+
+    # Metadata
     pdf.set_font("Arial", size=12)
-    safe_text = text.encode("latin1", "ignore").decode("latin1")
-    pdf.multi_cell(0, 10, safe_text)
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
-    return pdf_bytes
+    login_time = datetime.now().strftime("%d-%m-%Y %I:%M %p")
+
+    content = f"""
+Username        : {username}
+Login Time     : {login_time}
+Disease        : {disease}
+
+Prediction Result:
+{result_text}
+"""
+
+    safe_text = content.encode("latin1", "ignore").decode("latin1")
+    pdf.multi_cell(0, 8, safe_text)
+    pdf.ln(5)
+
+    # Brain Image Section
+    if image is not None:
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(0, 10, "Uploaded MRI Image:", ln=True)
+
+        img_path = "temp_brain_image.jpg"
+        image.save(img_path)
+
+        pdf.image(img_path, x=30, w=150)
+        pdf.ln(10)
+
+    return pdf.output(dest="S").encode("latin1")
+
 
 # ===================== MODEL LOADERS =====================
 @st.cache_resource
@@ -295,8 +327,13 @@ def disease_page(title, model_loader, input_func=None, is_brain=False):
                 st.success(result_text)
 
             # PDF report
-            st.session_state['report'] = f"User: {st.session_state['current_user']}\n{result_text}"
-            pdf_bytes = create_pdf(st.session_state['report'])
+            pdf_bytes = create_pdf(
+                username=st.session_state['current_user'],
+                disease=title,
+                result_text=result_text,
+                image=image if is_brain else None
+            )
+
             st.download_button(
                 label="📄 Download PDF Report",
                 data=pdf_bytes,
