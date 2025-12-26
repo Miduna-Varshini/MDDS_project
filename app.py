@@ -8,32 +8,6 @@ from PIL import Image
 import requests
 import io
 
-def appointment_booking(disease):
-    st.subheader("📅 Book Doctor Appointment")
-
-    doctor_type = {
-        "Heart Disease": "Cardiologist",
-        "Diabetes": "Diabetologist",
-        "Kidney Disease": "Nephrologist",
-        "Liver Disease": "Hepatologist",
-        "Brain Tumor": "Neurologist"
-    }
-
-    doctor = doctor_type.get(disease, "General Physician")
-
-    date = st.date_input("Select Appointment Date")
-    time = st.time_input("Select Time")
-
-    st.markdown(f"👨‍⚕️ **Recommended Doctor:** {doctor}")
-
-    # Teleconsultation link (dummy but real-looking)
-    meet_link = "https://meet.google.com/new"
-
-    if st.button("✅ Confirm Appointment"):
-        st.success("Appointment Booked Successfully 🎉")
-        st.info(f"📅 Date: {date}")
-        st.info(f"⏰ Time: {time}")
-        st.markdown(f"🔗 **Join Consultation:** [Click Here]({meet_link})")
 
 # ===================== SESSION INIT =====================
 if 'page' not in st.session_state:
@@ -374,6 +348,32 @@ def disease_page(title, model_loader, input_func=None, is_brain=False):
             st.code(str(e))
 
     st.button("⬅️ Back", on_click=lambda: st.session_state.update({'page':'Home'}))
+def appointment_booking(disease):
+    st.subheader("📅 Book Doctor Appointment")
+
+    doctor_type = {
+        "Heart Disease": "Cardiologist",
+        "Diabetes": "Diabetologist",
+        "Kidney Disease": "Nephrologist",
+        "Liver Disease": "Hepatologist",
+        "Brain Tumor": "Neurologist"
+    }
+
+    doctor = doctor_type.get(disease, "General Physician")
+
+    date = st.date_input("Select Appointment Date")
+    time = st.time_input("Select Time")
+
+    st.markdown(f"👨‍⚕️ **Recommended Doctor:** {doctor}")
+
+    # Teleconsultation link
+    meet_link = "https://meet.google.com/new"
+
+    if st.button("✅ Confirm Appointment"):
+        st.success("Appointment Booked Successfully 🎉")
+        st.info(f"📅 Date: {date}")
+        st.info(f"⏰ Time: {time}")
+        st.markdown(f"🔗 **Join Consultation:** [Click Here]({meet_link})")
 
 # ===================== INPUT FUNCTIONS =====================
 def heart_inputs():
