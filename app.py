@@ -8,7 +8,6 @@ import speech_recognition as sr
 import tempfile
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
-import numpy as np
 
 # ===================== SESSION INIT =====================
 if 'page' not in st.session_state:
@@ -88,6 +87,7 @@ def load_pickle_model(path):
 def load_brain_model(path="models/brain_tumor_model.h5"):
     model = load_model(path)
     return model
+
 # ===================== SIGNUP & LOGIN =====================
 def signup():
     st.title("📝 Signup")
@@ -121,7 +121,6 @@ def home_dashboard():
     st.markdown(f"<h3 style='text-align:center; color:black; margin-bottom:30px;'>Welcome <b>{st.session_state['current_user']}</b>! Select a disease:</h3>", unsafe_allow_html=True)
     
     st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
-    
     cards = [
         ("❤️ Heart","heart_card","Predict Heart Disease","Heart"),
         ("🩸 Diabetes","diabetes_card","Predict Diabetes","Diabetes"),
@@ -139,6 +138,7 @@ def home_dashboard():
         st.session_state['logged_in'] = False
         st.session_state['current_user'] = None
         st.session_state['page'] = 'Login'
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ===================== DISEASE INPUTS =====================
 def heart_inputs():
@@ -194,6 +194,8 @@ def liver_inputs():
     albumin = st.number_input("Albumin",1.0,6.0,3.1)
     ag_ratio = st.number_input("Albumin/Globulin Ratio",0.0,3.0,0.9)
     return [age,gender_val,total_bilirubin,direct_bilirubin,alk_phos,alt,ast,total_proteins,albumin,ag_ratio]
+
+# ===================== BRAIN TUMOR PREDICTION PAGE =====================
 def brain_tumor_predict_page():
     st.header("🧠 Brain Tumor Prediction")
     uploaded_file = st.file_uploader("Upload MRI Image...", type=["jpg","jpeg","png"])
@@ -225,6 +227,7 @@ def brain_tumor_predict_page():
                 st.code(str(e))
 
     st.button("⬅️ Back", on_click=lambda: st.session_state.update({'page':'Home'}))
+
 # ===================== APPOINTMENTS =====================
 def appointment_booking(disease):
     st.subheader("📅 Doctor Consultation")
@@ -271,45 +274,6 @@ def speech_to_text_page():
         except sr.RequestError as e:
             st.error(f"API Error: {e}")
 
-# ===================== DISEASE PREDICTION PAGE =====================
-def disease_page(title, model_loader, input_func=None, is_brain=False):
-    st.header(f"{title} Prediction")
-    image = None
-    inputs = None
-    if is_brain:
-        uploaded_file = st.file_uploader("Upload MRI Image", type=["jpg","jpeg","png"])
-        if uploaded_file:
-            image = Image.open(uploaded_file).convert("RGB")
-            st.image(image, caption="Uploaded MRI", use_column_width=True)
-    else:
-        if input_func:
-            inputs = input_func()
-
-    if st.button(f"🔍 Predict {title}"):
-        try:
-            if is_brain:
-                st.warning("Brain Tumor prediction disabled on cloud.")
-                result_text = "⚠️ Prediction unavailable"
-            else:
-                model, scaler = model_loader()
-                X = np.array([inputs])
-                X_scaled = scaler.transform(X)
-                pred = model.predict(X_scaled)[0]
-                result_text = f"{title} Result: {'⚠️ Detected' if pred==1 else '✅ Not Detected'}"
-
-            if '⚠️' in result_text:
-                st.error(result_text)
-                appointment_booking(title)
-            else:
-                st.success(result_text)
-
-            pdf_bytes = create_pdf(st.session_state['current_user'], title, result_text, image)
-            st.download_button("📄 Download PDF Report", pdf_bytes, f"{title}_Report.pdf","application/pdf")
-        except Exception as e:
-            st.error("Prediction failed")
-            st.code(str(e))
-    st.button("⬅️ Back", on_click=lambda: st.session_state.update({'page':'Home'}))
-
 # ===================== MAIN =====================
 if st.session_state['page']=="Signup":
     signup()
@@ -326,6 +290,6 @@ elif st.session_state['page']=="Kidney":
 elif st.session_state['page']=="Liver":
     disease_page("Liver Disease", lambda: load_pickle_model("models/liver_model.pkl"), liver_inputs)
 elif st.session_state['page']=="Brain":
-    disease_page("Brain Tumor", load_brain_model, is_brain=True)
+    brain_tumor_predict_page()
 elif st.session_state['page']=="Speech":
     speech_to_text_page()
