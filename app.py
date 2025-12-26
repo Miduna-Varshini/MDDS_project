@@ -319,14 +319,14 @@ def disease_page(title, model_loader, input_func=None, is_brain=False):
                 pred = model.predict(X_scaled)[0]
                 result_text = f"{title} Result: {'⚠️ Detected' if pred==1 else '✅ Not Detected'}"
 
-            if '⚠️' in result_text:
-                st.error(result_text)
+            # Show result
+                if '⚠️' in result_text:
+                    st.error(result_text)
+                    appointment_booking(title)   # <-- CALL HERE
+                else:
+                    st.success(result_text)
 
-                            # 🔴 ADD APPOINTMENT FEATURE HERE
-                appointment_booking(title)
 
-            else:
-                st.success(result_text)
 
             # PDF report
             pdf_bytes = create_pdf(
