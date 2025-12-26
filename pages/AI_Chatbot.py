@@ -1,47 +1,56 @@
 import streamlit as st
-import openai
+import google.generativeai as genai
 
-# ================= Streamlit page config =================
+# ------------------- Page Config -------------------
 st.set_page_config(page_title="AI Health Assistant", page_icon="🤖")
+
 st.title("🤖 AI Health Assistant")
 st.write("Ask questions about symptoms, diseases, reports, or prevention.")
 
-# ================== Load OpenAI API ==================
-api_key = st.secrets.get("OPENAI_API_KEY")  # from .streamlit/secrets.toml
+# ------------------- Load API Key -------------------
+# Make sure you have .streamlit/secrets.toml with:
+# GEMINI_API_KEY = "YOUR_ACTUAL_API_KEY_HERE"
+api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
-    st.error("OPENAI_API_KEY not found in secrets.toml")
+    st.error("GEMINI_API_KEY not found in secrets.toml")
     st.stop()
 
-openai.api_key = api_key
+# ------------------- Configure Gemini -------------------
+genai.configure(api_key=api_key)
 
-# ================== Chat Session ==================
+# Use a valid model
+model = genai.GenerativeModel("models/gemini-2.0-flash")
+
+# ------------------- Initialize Chat -------------------
+if "chat" not in st.session_state:
+    st.session_state.chat = model.start_chat(history=[])
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat history
+# ------------------- Display Chat History -------------------
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User input
+# ------------------- User Input -------------------
 user_input = st.chat_input("Ask your health question...")
+
 if user_input:
-    # Append user message
+    # Show user message
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # Call OpenAI GPT API
+    # Send message to Gemini
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # or "gpt-4" if available
-            messages=st.session_state.messages
-        )
-        reply = response.choices[0].message.content
+        response = st.session_state.chat.send_message(user_input)
+        reply = response.text
     except Exception as e:
+        # Catch any error (quota, 403, 404, etc.)
         reply = f"⚠️ Error: {e}"
 
-    # Append assistant message
+    # Show assistant response
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
         st.markdown(reply)
