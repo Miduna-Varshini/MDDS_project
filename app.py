@@ -253,7 +253,18 @@ def appointment_booking(disease):
         st.subheader("📋 Appointment History")
         for appt in st.session_state['appointments'][username]:
             st.write(f"- **{appt['disease']}** with {appt['doctor']} ➡️ [Link]({appt['link']}) (Saved: {appt['time']})")
-
+def show_hospitals(disease):
+    st.subheader("🏥 Nearby Hospitals / Clinics")
+    search_map = {
+        "Heart Disease": "cardiology hospital near me",
+        "Diabetes": "diabetes clinic near me",
+        "Kidney Disease": "nephrology hospital near me",
+        "Liver Disease": "hepatology hospital near me",
+        "Brain Tumor": "neurology hospital near me"
+    }
+    query = search_map.get(disease, "hospital near me")
+    maps_link = f"https://www.google.com/maps/search/{query.replace(' ', '+')}"
+    st.markdown(f"🔍 **Search Hospitals:** [Click Here]({maps_link})")
 # ===================== SPEECH TO TEXT =====================
 def speech_to_text_page():
     st.header("🎙️ Speech to Text")
