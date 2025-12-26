@@ -16,7 +16,8 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 # Use a valid model (text-bison-001)
-model = genai.GenerativeModel("text-bison-001")
+model = genai.GenerativeModel("models/gemini-1.5-flash")
+
 
 # Initialize chat
 if "chat" not in st.session_state:
