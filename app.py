@@ -157,10 +157,10 @@ def disease_page(disease_name, model_loader, input_func):
 
             if prediction == 1:
                 result_text = f"⚠️ {disease_name} Detected"
-                st.error(result_text)
+                
             else:
                 result_text = f"✅ No {disease_name} Detected"
-                st.success(result_text)
+                
 
             # PDF
             pdf_bytes = create_pdf(
