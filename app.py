@@ -241,6 +241,7 @@ def liver_inputs():
 
 # ===================== BRAIN TUMOR PREDICTION PAGE =====================
 @st.cache_resource
+@st.cache_resource
 def load_brain_model():
     FILE_ID = "1r7Kmf14ZGKQK3GSTk3nxPxfAyGpg2m_b"
     URL = f"https://drive.google.com/uc?id={FILE_ID}"
@@ -249,14 +250,13 @@ def load_brain_model():
     with open("brain_tumor_model.h5", "wb") as f:
         f.write(response.content)
 
-    model = load_model("brain_tumor_model.h5")
-    return model
+    return load_model("brain_tumor_model.h5")
+
 
 def brain_tumor_page():
     st.header("🧠 Brain Tumor Detection")
 
     model = load_brain_model()
-    st.write("Model expects:", model.input_shape)
 
     uploaded_file = st.file_uploader(
         "Upload Brain MRI Image",
@@ -267,57 +267,54 @@ def brain_tumor_page():
         image = Image.open(uploaded_file).convert("RGB")
         st.image(image, caption="Uploaded MRI", use_column_width=True)
 
-        input_shape = model.input_shape[1:]  # remove batch size
+        input_shape = model.input_shape[1:]
 
-        # CASE 1: Dense / Flattened model
+        # Preprocess
         if len(input_shape) == 1:
             side = int(np.sqrt(input_shape[0] / 3))
             img = image.resize((side, side))
             img_array = np.array(img) / 255.0
-            img_array = img_array.flatten()
-            img_array = np.expand_dims(img_array, axis=0)
+            img_array = img_array.flatten().reshape(1, -1)
 
-        # CASE 2: CNN grayscale
         elif input_shape[-1] == 1:
-            img = image.resize((input_shape[0], input_shape[1]))
-            img = img.convert("L")
+            img = image.resize((input_shape[0], input_shape[1])).convert("L")
             img_array = np.array(img) / 255.0
-            img_array = np.expand_dims(img_array, axis=-1)
-            img_array = np.expand_dims(img_array, axis=0)
+            img_array = img_array.reshape(1, input_shape[0], input_shape[1], 1)
 
-        # CASE 3: CNN RGB
         else:
             img = image.resize((input_shape[0], input_shape[1]))
             img_array = np.array(img) / 255.0
-            img_array = np.expand_dims(img_array, axis=0)
+            img_array = img_array.reshape(1, input_shape[0], input_shape[1], 3)
 
         if st.button("🔍 Predict Brain Tumor"):
             prediction = model.predict(img_array)
 
             if prediction[0][0] > 0.5:
-                st.error("⚠️ Brain Tumor Detected")
+                result_text = "⚠️ Brain Tumor Detected"
                 st.error(result_text)
             else:
-                st.success("✅ No Brain Tumor Detected")
+                result_text = "✅ No Brain Tumor Detected"
                 st.success(result_text)
+
+            # PDF
             pdf_bytes = create_pdf(
                 username=st.session_state['current_user'],
                 disease="Brain Tumor",
                 result_text=result_text,
                 image=image
             )
+
             st.download_button(
                 "📄 Download Brain Tumor Report",
                 pdf_bytes,
                 file_name="Brain_Tumor_Report.pdf",
                 mime="application/pdf"
             )
-            # ================= DOCTOR & HOSPITAL INFO =================
+
             appointment_booking("Brain Tumor")
             show_hospitals("Brain Tumor")
-        
-    st.button("⬅️ Back", on_click=lambda: st.session_state.update({'page': 'Home'}))
 
+    st.button("⬅️ Back", on_click=lambda: st.session_state.update({'page': 'Home'}))
 
 # ===================== APPOINTMENTS =====================
 def appointment_booking(disease):
