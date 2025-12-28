@@ -301,7 +301,28 @@ def brain_tumor_page():
             # ================= DOCTOR & HOSPITAL INFO =================
             appointment_booking("Brain Tumor")
             show_hospitals("Brain Tumor")
+        # ===== PDF REPORT (THIS WAS MISSING) =====
+        pdf_bytes = create_pdf(
+            username=st.session_state['current_user'],
+            disease="Brain Tumor",
+            result_text=result_text,
+            image=image
+        )
 
+        st.download_button(
+            "📄 Download PDF Report",
+            pdf_bytes,
+            "Brain_Tumor_Report.pdf",
+            "application/pdf"
+        )
+
+        # ===== APPOINTMENT + HOSPITALS (THIS WAS MISSING) =====
+        appointment_booking("Brain Tumor")
+        show_hospitals("Brain Tumor")
+
+    except Exception as e:
+        st.error("Prediction failed ❌")
+        st.code(str(e))
     st.button("⬅️ Back", on_click=lambda: st.session_state.update({'page': 'Home'}))
 
 
